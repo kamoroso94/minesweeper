@@ -1,0 +1,121 @@
+/* Code by Kyle Amoroso in 2014 */
+
+body {
+	background: #C0C0C0;
+	font-family: calibri,arial,sans-serif;
+}
+
+div.center {
+	text-align: center;
+}
+
+div.wrap {
+	display: inline-block;
+	text-align: left;
+}
+
+#gamewrapper {
+	margin: 0px;
+	padding: 0px;
+	border-style: solid;
+	border-spacing: 0px;
+	border-width: 12px;
+	border-image-source: url("images/outer.png");
+	border-image-slice: 12 12 12 12;
+	background: #C0C0C0;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+}
+
+#gamewrapper th {
+	position: relative;
+	margin: 0px;
+	padding: 0px;
+	height: 66px;
+	border-style: solid;
+	border-width: 10px;
+	border-image-source: url("images/inner.png");
+	border-image-slice: 10 10 10 10;
+}
+
+#gamewrapper td {
+	margin: 0px;
+	padding: 0px;
+	border-style: solid;
+	border-width: 12px;
+	border-image-source: url("images/inner2.png");
+	border-image-slice: 12 12 12 12;
+}
+
+#mines-display,#face-display,#time-display {
+	position: absolute;
+	top: 8px;
+	padding-top: 2px;
+	background: url("images/spritesheet.png");
+	text-align: center;
+}
+
+#mines-display div,#time-display div {
+	display: inline-block;
+	width: 26px;
+	height: 46px;
+	background: url("images/spritesheet.png") 0px -64px;
+}
+
+#face-display div {
+	display: inline-block;
+	width: 48px;
+	height: 48px;
+	background: url("images/spritesheet.png") 0px -110px;
+}
+
+#mines-display {
+	left: 10px;
+	width: 82px;
+	height: 50px;
+	background-position: -10px -164px;
+}
+
+#face-display {
+	left: 50%;
+	margin-left: -26px;
+	width: 52px;
+	height: 52px;
+	background-position: -120px -164px;
+}
+
+#time-display {
+	right: 14px;
+	width: 82px;
+	height: 50px;
+	background-position: -196px -164px;
+}
+
+#game {
+	border-collapse: collapse;
+}
+
+#game[data-cheat] {
+	background-color: #F00;
+}
+
+#game[data-cheat] td[data-mine]:hover {
+	/*cursor:not-allowed;*/
+	opacity: 0.5;
+}
+
+#game td {
+	padding: 0px;
+	width: 32px;
+	height: 32px;
+	border: none;
+	background: url("images/spritesheet.png") 0px -32px;
+}
+
+.dialog-hide-x {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	float: none;
+}

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Minesweeper</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!-- SEO -->
+        <meta name="application-name" content="Minesweeper" />
+        <meta name="author" content="Kyle Amoroso" />
+        <meta name="description" content="The original Minesweeper recreated in HTML5." />
+		<meta name="keywords" content="minesweeper,puzzle,game,html5" />
+        <meta name="version" content="1.1" />
+        <meta property="og:title" content="Minesweeper" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://pitt.edu/~ksa18/minesweeper/" />
+        <meta property="og:image" content="http://pitt.edu/~ksa18/minesweeper/splash.png" />
+        <meta property="og:description" content="The original Minesweeper recreated in HTML5." />
+		<!-- Favicons -->
+		<link rel="icon" type="image/x-icon" href="favicon.ico" />
+        <link rel="icon" type="image/png" href="icons/favicon-16.png" />
+        <link rel="icon" type="image/png" href="icons/favicon-32.png" />
+        <link rel="icon" type="image/png" href="icons/favicon-64.png" />
+        <link rel="icon" type="image/png" href="icons/favicon-128.png" />
+		<!-- Custom -->
+		<link rel="stylesheet" href="dialog.css" />
+		<link rel="stylesheet" href="style.css" />
+		<script src="dialog.js"></script>
+		<script src="minesweeper.js"></script>
+	</head>
+	
+	<body>
+		<div class="center">
+			<div class="wrap">
+				<table id="gamewrapper">
+					<tr><th>
+						<div id="mines-display"><div></div><div></div><div></div></div>
+						<div id="face-display"><div></div></div>
+						<div id="time-display"><div></div><div></div><div></div></div>
+					</th></tr>
+					<tr><td>
+						<table id="game"><tr><td></td></tr></table>
+					</td></tr>
+				</table>
+				<p>
+					<b>Zoom:</b>
+					<select id="zoom" title="Zoom">
+						<option value="0.5">100%</option>
+						<option value="1" selected>200%</option>
+					</select><br />
+					<b>Difficulty:</b>
+					<select id="difficulty" title="Difficulty">
+						<option value="9,9,10" selected>Beginner</option>
+						<option value="16,16,40">Intermediate</option>
+						<option value="30,16,99">Advanced</option>
+						<option value="custom">Custom&hellip;</option>
+					</select><br />
+					<label><input type="checkbox" id="marks" />Marks (?)</label>
+				</p>
+				<a href="https://chrome.google.com/webstore/detail/minesweeper/pkpifnggkgjkiblinjghkaoggafjiodf"><img src="webstore.png" alt="Available in the Chrome Web Store" /></a>
+			</div>
+		</div>
+		<!-- dialog -->
+		<div class="dialog-container" id="custom-dialog">
+			<form class="dialog">
+				<header class="dialog-header">
+					<span class="dialog-title">Custom Field</span>
+					<span class="dialog-hide-x" data-dialog-hide="custom-dialog">&times;</span>
+				</header>
+				<table class="dialog-body">
+					<tr><td><label for="height-entry">Height:</label></td><td><input type="text" size="2" maxlength="2" id="height-entry" /></tr>
+					<tr><td><label for="width-entry">Width:</label></td><td><input type="text" size="2" maxlength="2" id="width-entry" /></td></tr>
+					<tr><td><label for="mines-entry">Mines:</label></td><td><input type="text" size="3" maxlength="3" id="mines-entry" /></td></tr>
+				</table>
+				<footer class="dialog-footer">
+					<input type="submit" value="OK" />
+					<input type="button" data-dialog-hide="custom-dialog" value="Cancel" />
+				</footer>
+			</form>
+		</div>
+	</body>
+</html>

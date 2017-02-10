@@ -1,12 +1,15 @@
 "use strict";
 
 // TODO: add touch support
+// TODO: review/simplify game logic
 
-var game, tilesCovered, minesTag, faceTag, timeTag, isMarksEnabled, pressedTile;
+var game, tilesCovered, minesTag, faceTag, timeTag, isMarksEnabled, pressedTile, timer;
 var endGame = false;
 var isTilePressed = false;
+var LMB = 1;	// left mouse button
+var RMB = 3;	// right mouse button
 
-var timer = {
+/*{
 	t: 0,
 	clock: null,
 	resume: function() {
@@ -43,7 +46,7 @@ var timer = {
 			digitTags[i].style.backgroundPosition = "0px -64px";
 		}
 	}
-};
+};*/
 
 var config = {
 	custom: false,
@@ -69,7 +72,7 @@ window.addEventListener("load", function() {
 	var zoom = document.getElementById("zoom");
 	var CTRL_KEY = 17;
 	
-	difficulty.value = (config.custom)?"custom":config.difficulty;
+	difficulty.value = config.custom ? "custom" : config.difficulty;
 	
 	marks.checked = config.marks;
 	zoom.value = config.zoom;
@@ -80,6 +83,16 @@ window.addEventListener("load", function() {
 	faceTag = document.getElementById("face-display").firstElementChild;
 	minesTag = document.getElementById("mines-display");
 	timeTag = document.getElementById("time-display");
+	
+	timer = new Timer(function(time) {
+		var seconds = Math.floor(time / 1000);
+		var timeText = digitFormat(Math.min(seconds, 999), 3);
+		var digitTags = timeTag.children;
+		
+		for(var i = 0; i < digitTags.length; i++) {
+			digitTags[i].style.backgroundPosition = -26 * parseInt(timeText.charAt(i)) + "px -64px";
+		}
+	}, 1000);
 	
 	zoom.addEventListener("change", function() {
 		document.getElementById("gamewrapper").style.zoom = this.value;
@@ -106,7 +119,7 @@ window.addEventListener("load", function() {
 	});
 	
 	faceTag.addEventListener("click", function() {
-		timer.stop();
+		timer.pause();
 		
 		if(config.custom) {
 			config.difficulty.split(",").forEach(function(value, index) {
@@ -172,7 +185,7 @@ window.addEventListener("load", function() {
 });
 
 document.addEventListener("mouseup", function(e) {
-	if(e.which == 1) {
+	if(e.which == LMB) {
 		if(!endGame) {
 			faceTag.style.backgroundPosition = "0px -110px";
 		}
@@ -204,13 +217,16 @@ function load() {
 function loadHeader(params) {
 	// set up game header
 	endGame = false;
-	timer.stop();
-	timer.clear();
+	timer.reset();
+	
+	var digitTags = timeTag.children;
+	
+	for(var i = 0; i < digitTags.length; i++) {
+		digitTags[i].style.backgroundPosition = "0px -64px";
+	}
 	
 	faceTag.style.backgroundPosition = "0px -110px";
 	
-	game.width = 32 * params.cols;
-	game.height = 32 * params.rows;
 	tilesCovered = params.rows * params.cols;
 	
 	var mineText = digitFormat(params.flags, 3);
@@ -224,6 +240,9 @@ function loadHeader(params) {
 function loadBoard(params, grid) {
 	// set up game board
 	var isFirstMove = true;
+	
+	game.width = 32 * params.cols;
+	game.height = 32 * params.rows;
 	
 	while(game.firstChild){
 		game.removeChild(game.firstChild);
@@ -242,8 +261,6 @@ function loadBoard(params, grid) {
 			});
 			
 			td.addEventListener("mousedown", function(e) {
-				var LMB = 1;	// left mouse button
-				var RMB = 3;	// right mouse button
 				var tilePos = parsePoint(this.id);
 				var tile = grid.get(tilePos.x, tilePos.y);
 				
@@ -313,7 +330,7 @@ function loadBoard(params, grid) {
 				if(tile.isFlagged || !tile.isCovered) {
 					if(isFirstMove) {
 						isFirstMove = false;
-						timer.start();
+						timer.resume();
 					}
 					
 					return;
@@ -339,13 +356,13 @@ function loadBoard(params, grid) {
 						}
 					}
 					
-					timer.stop();
+					timer.pause();
 					faceTag.style.backgroundPosition = "-144px -110px";
 					endGame = true;
 				} else {
 					if(tile.isMine && isFirstMove) {
 						isFirstMove = false;
-						timer.start();
+						timer.resume();
 						
 						var emptyTile = findEmptyTile(grid);
 						var emptyTilePos = parsePoint(emptyTile.elem.id);
@@ -374,14 +391,14 @@ function loadBoard(params, grid) {
 					} else {
 						if(isFirstMove) {
 							isFirstMove = false;
-							timer.start();
+							timer.resume();
 						}
 					}
 					
 					floodTiles(tile, grid);
 					
 					if(tilesCovered == params.mines) {
-						timer.stop();
+						timer.pause();
 						faceTag.style.backgroundPosition = "-192px -110px";
 						endGame = true;
 					}

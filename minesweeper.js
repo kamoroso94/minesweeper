@@ -160,23 +160,13 @@ window.addEventListener("load", function() {
 		var width = parseInt(document.getElementById("width-entry").value);
 		var mines = parseInt(document.getElementById("mines-entry").value);
 		
-		if(isNaN(height)) {
-			height = 9;
-		}
-		if(isNaN(width)) {
-			width = 9;
-		}
-		if(isNaN(mines)) {
-			mines = 10;
-		}
-		
-		height = Math.max(9, Math.min(height, 24));
-		width = Math.max(9, Math.min(width, 30));
-		mines = Math.max(10, Math.min(mines, (height - 1) * (width - 1)));
+		height = isNaN(height) ? 9 : Math.max(9, Math.min(height, 24));
+		width = isNaN(width) ? 9 : Math.max(9, Math.min(width, 30));
+		mines = isNaN(mines) ? 10 : Math.max(10, Math.min(mines, (height - 1) * (width - 1)));
 		
 		config.custom = true;
 		config.difficulty = width + "," + height + "," + mines;
-		localStorage.setItem("options",JSON.stringify(config));
+		localStorage.setItem("options", JSON.stringify(config));
 		hideDialog("custom-dialog");
 		load();
 	});

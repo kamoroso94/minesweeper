@@ -23,7 +23,7 @@ Object.assign(config, options);
 localStorage.setItem('options', JSON.stringify(config));
 
 // event listeners
-window.addEventListener('load', function() {
+window.addEventListener('load', () => {
   const ids = ['width-entry', 'height-entry', 'mines-entry'];
   const difficulty = document.getElementById('difficulty');
   const customDialog = document.getElementById('custom-dialog');
@@ -46,11 +46,12 @@ window.addEventListener('load', function() {
   timer = new Timer((time) => {
     const seconds = Math.floor(time / 1000);
     const timeText = digitFormat(Math.min(seconds, 999), 3);
-    const digitTags = timeTag.children;
+    const digitTags = Array.from(timeTag.children);
 
-    for(let i = 0; i < digitTags.length; i++) {
-      digitTags[i].style.backgroundPosition = `${-26 * parseInt(timeText.charAt(i))}px -64px`;
-    }
+    digitTags.forEach((tag, index) => {
+      const digitIndex = parseInt(timeText.charAt(index));
+      tag.style.backgroundPosition = `${-26 * digitIndex}px -64px`;
+    });
   }, 1000);
 
   zoom.addEventListener('change', () => {
@@ -161,10 +162,9 @@ function loadHeader(params) {
   endGame = false;
   timer.reset();
 
-  const timeDigitTags = timeTag.children;
-
-  for(let i = 0; i < timeDigitTags.length; i++) {
-    timeDigitTags[i].style.backgroundPosition = '0px -64px';
+  const timeDigitTags = Array.from(timeTag.children);
+  for(const tag of timeDigitTags) {
+    tag.style.backgroundPosition = '0px -64px';
   }
 
   faceTag.style.backgroundPosition = '0px -110px';
@@ -172,11 +172,12 @@ function loadHeader(params) {
   tilesCovered = params.rows * params.cols;
 
   const mineText = digitFormat(params.flags, 3);
-  const mineDigitTags = minesTag.children;
+  const mineDigitTags = Array.from(minesTag.children);
 
-  for(let i = 0; i < mineDigitTags.length; i++) {
-    mineDigitTags[i].style.backgroundPosition = -26 * parseInt(mineText.charAt(i)) + 'px -64px';
-  }
+  mineDigitTags.forEach((tag, index) => {
+    const digitIndex = parseInt(mineText.charAt(index));
+    tag.style.backgroundPosition = -26 * digitIndex + 'px -64px';
+  });
 }
 
 function loadBoard(params, grid) {
@@ -244,12 +245,13 @@ function loadBoard(params, grid) {
             }
 
             const mineText = digitFormat(params.flags, 3);
-            const digitTags = minesTag.children;
+            const mineDigitTags = Array.from(minesTag.children);
             const domain = '0123456789-';
 
-            for(let i = 0; i < digitTags.length; i++) {
-              digitTags[i].style.backgroundPosition = `${-26 * domain.indexOf(mineText.charAt(i))}px -64px`;
-            }
+            mineDigitTags.forEach((tag, index) => {
+              const digitIndex = domain.indexOf(mineText.charAt(index));
+              tag.style.backgroundPosition = `${-26 * digitIndex}px -64px`;
+            });
           }
 
           break;
@@ -303,7 +305,7 @@ function loadBoard(params, grid) {
             const emptyTilePos = parsePoint(emptyTile.elem.id);
 
             emptyTile.isMine = true;
-            emptyTile.elem.setAttribute('data-mine', true);
+            emptyTile.elem.dataset.mine = true;
 
             for(let h = -1; h <= 1; h++) {
               for(let k = -1; k <= 1; k++) {
@@ -314,7 +316,7 @@ function loadBoard(params, grid) {
             }
 
             tile.isMine = false;
-            tile.elem.removeAttribute('data-mine');
+            delete tile.elem.dataset.mine;
 
             for(let h = -1; h <= 1; h++) {
               for(let k = -1; k <= 1; k++) {
@@ -352,22 +354,21 @@ function loadGrid(params, grid) {
     for(let y = 0; y < grid.height; y++) {
       // fill with covered, unflagged, unmarked, neighborless, mineless tiles
 			const id = [x, y].join(',');
-      grid.set(x, y, createTile(true, false, false, 0, false, document.getElementById(id)));
+      grid.set(x, y, createTile(document.getElementById(id)));
       grid.get(x, y).elem.style.backgroundPosition = '0px -32px';
     }
   }
 
   // set mines
   for(let i = 0; i < params.mines; i++) {
-    const mine = {x: 0, y: 0};
-
+    const mine = {};
     do {
       mine.x = Math.floor(Math.random() * grid.width);
       mine.y = Math.floor(Math.random() * grid.height);
     } while(grid.get(mine.x, mine.y).isMine);
 
     grid.get(mine.x, mine.y).isMine = true;
-    grid.get(mine.x, mine.y).elem.setAttribute('data-mine', true);
+    grid.get(mine.x, mine.y).elem.dataset.mine = true;
   }
 
   // set proximities
@@ -379,9 +380,10 @@ function loadGrid(params, grid) {
 
       for(let h = -1; h <= 1; h++) {
         for(let k = -1; k <= 1; k++) {
-          if(grid.has(x + h, y + k) && !(h == 0 && k == 0)) {
-            tile.proximity += grid.get(x + h, y + k).isMine ? 1 : 0;
-          }
+          if(h == 0 && k == 0) continue;
+          if(!grid.has(x + h, y + k)) continue;
+
+          tile.proximity += grid.get(x + h, y + k).isMine ? 1 : 0;
         }
       }
     }
@@ -395,21 +397,21 @@ function floodTiles(firstTile, grid) {
   while(stack.length != 0) {
     const tile = stack.pop();
 
-    if(tile.isCovered && !tile.isFlagged) {
-      tile.isCovered = false;
-      tilesCovered--;
-      tile.elem.style.backgroundPosition = `${-32 * tile.proximity}px 0px`;
+    if(!tile.isCovered || tile.isFlagged) continue;
 
-      if(tile.proximity == 0) {
-        const tilePos = parsePoint(tile.elem.id);
+    tile.isCovered = false;
+    tilesCovered--;
+    tile.elem.style.backgroundPosition = `${-32 * tile.proximity}px 0px`;
 
-        for(let h = -1; h <= 1; h++) {
-          for(let k = -1; k <= 1; k++) {
-            if(grid.has(tilePos.x + h, tilePos.y + k) && !(h == 0 && k == 0)) {
-              stack.push(grid.get(tilePos.x + h, tilePos.y + k));
-            }
-          }
-        }
+    if(tile.proximity != 0) continue;
+
+    const tilePos = parsePoint(tile.elem.id);
+    for(let h = -1; h <= 1; h++) {
+      for(let k = -1; k <= 1; k++) {
+        if(h == 0 && k == 0) continue;
+        if(!grid.has(tilePos.x + h, tilePos.y + k)) continue;
+
+        stack.push(grid.get(tilePos.x + h, tilePos.y + k));
       }
     }
   }
@@ -441,13 +443,13 @@ function clamp(x, min, max) {
 	return Math.max(min, Math.min(x, max));
 }
 
-function createTile(co, fl, ma, pr, mi, el) {
+function createTile(elem) {
   return {
-    isCovered: co,
-    isFlagged: fl,
-    isMarked: ma,
-    proximity: pr,
-    isMine: mi,
-    elem: el
+    isCovered: true,
+    isFlagged: false,
+    isMarked: false,
+    proximity: 0,
+    isMine: false,
+    elem
   };
 }
